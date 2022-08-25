@@ -17,8 +17,23 @@ import ImageView from './src/components/imageView';
 const Stack = createNativeStackNavigator();
 
 const App = () => {
+  const linking = {
+    prefixes: ['wall_app://', 'https://wall_app.com'],
+    config: {
+      screens: {
+        Home: 'home',
+        ImageFull: {
+          path: 'imagefull/:url',
+          parse: {
+            url: url => `${url}`,
+          },
+        },
+      },
+    },
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
@@ -29,12 +44,12 @@ const App = () => {
         }}>
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen
-          name="Image"
+          name="ImageFull"
           component={ImageFull}
-          options={({route}) => ({title: route.params.item.name})}
+          options={({route}) => ({title: route.params?.item?.name})}
         />
         <Stack.Screen
-          name="ImageFull"
+          name="ImageView"
           component={ImageView}
           options={{headerShown: false}}
         />

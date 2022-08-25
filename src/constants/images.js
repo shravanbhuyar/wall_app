@@ -55,3 +55,5 @@ export const walls = [
     url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCyaZEVRnZzV_7BNT-zYCZ-dj5cbWNn3zDrQ&usqp=CAU',
   },
 ];
+
+export const loaderGif = require('../assets/images/loader.gif');

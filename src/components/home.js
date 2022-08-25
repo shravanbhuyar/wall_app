@@ -13,7 +13,9 @@ const Home = props => {
   const renderItem = item => (
     <TouchableOpacity
       style={{flex: 1, backgroundColor: 'black'}}
-      onPress={() => props.navigation.navigate('Image', {item})}>
+      onPress={() =>
+        props.navigation.navigate('ImageFull', {item: item, url: item.url})
+      }>
       <ImageCard imgData={item} />
     </TouchableOpacity>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -8,15 +8,22 @@ import {
   TouchableNativeFeedback,
   StyleSheet,
   PermissionsAndroid,
-  Platform,
+  Modal,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {scale} from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import RNFetchBlob from 'rn-fetch-blob';
+import {loaderGif} from '../constants/images';
 
 const ImageFull = props => {
+  const [isLoading, setIsLoading] = useState(false);
+  let url = decodeURIComponent(props.route.params.url);
+  console.log(url);
   const checkPermission = async () => {
     try {
+      //setIsLoading(true);
+      console.log('loading', isLoading);
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         {
@@ -31,13 +38,13 @@ const ImageFull = props => {
         alert('Storage Permission Not Granted');
       }
     } catch (err) {
-      console.warn(err);
+      console.log(err);
     }
   };
 
   const downloadImage = async () => {
     let date = new Date();
-    let ext = getExtention(props.route.params.item.url);
+    let ext = getExtention(url);
     ext = '.' + ext[0];
     const {config, fs} = RNFetchBlob;
     let PictureDir = fs.dirs.PictureDir;
@@ -55,24 +62,34 @@ const ImageFull = props => {
         description: 'Image',
       },
     };
+
     config(options)
-      .fetch('GET', props.route.params.item.url)
+      .fetch('GET', url)
       .then(res => {
+        setIsLoading(false);
         console.log('res -> ', JSON.stringify(res));
         alert('Image Downloaded Successfully.');
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        setIsLoading(false);
+        console.log(err);
+      });
   };
 
   const getExtention = filename => {
     return /[.]/.exec(filename) ? /[^.]+$/.exec(filename) : undefined;
   };
 
+  function onDownloadPress() {
+    setIsLoading(true);
+    checkPermission();
+  }
+
   return (
     <View>
       <ImageBackground
         source={{
-          uri: props.route.params.item.url,
+          uri: url,
         }}
         style={{
           width: '100%',
@@ -82,7 +99,7 @@ const ImageFull = props => {
         blurRadius={5}>
         <Image
           source={{
-            uri: props.route.params.item.url,
+            uri: url,
           }}
           style={{
             width: Dimensions.get('window').width,
@@ -105,7 +122,7 @@ const ImageFull = props => {
           <View style={styles.touchableView}>
             <TouchableNativeFeedback
               background={TouchableNativeFeedback.Ripple('black', true)}
-              onPress={checkPermission}>
+              onPress={onDownloadPress}>
               <View>
                 <Icon
                   name="download"
@@ -134,8 +151,8 @@ const ImageFull = props => {
             <TouchableNativeFeedback
               background={TouchableNativeFeedback.Ripple('black', true)}
               onPress={() =>
-                props.navigation.navigate('ImageFull', {
-                  item: props.route.params.item,
+                props.navigation.navigate('ImageView', {
+                  url: url,
                 })
               }>
               <View>
@@ -150,6 +167,13 @@ const ImageFull = props => {
           </View>
         </View>
       </ImageBackground>
+      <Modal visible={isLoading} transparent={true} style={{flex: 1}}>
+        <FastImage
+          source={loaderGif}
+          style={{flex: 1, alignSelf: 'center'}}
+          resizeMode={FastImage.resizeMode.contain}
+        />
+      </Modal>
     </View>
   );
 };
